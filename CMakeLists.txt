@@ -78,6 +78,8 @@ set(link_LIBS
 cmsis_stm32h7xx
 hal_stm32h7xx
 
+FatFs
+FatFs_App
 )
 
 
@@ -92,6 +94,9 @@ set(linker_OPTS)
 
 add_subdirectory(Drivers/CMSIS)
 add_subdirectory(Drivers/STM32H7xx_HAL_Driver)
+
+add_subdirectory(Middlewares/Third_Party/FatFs)
+add_subdirectory(FATFS)
 
 # Now call generated cmake
 # This will add script generated
