@@ -1,12 +1,5 @@
 /*!
-   \brief Заголовочный файл функций общего пользования
-   \file utils.h
-   \date 17 сент. 2019 г.
-   \internal
- (C) COPYRIGHT CyberTech-Signal
- We reserve all rights in this file and in the information
- contained therein. Reproduction, use or disclosure to third
- parties without express authority is strictly forbidden.
+
  *
  */
 
