@@ -21,7 +21,8 @@
         "fatfs.h": "c",
         "cstdio": "cpp",
         "cstring": "cpp",
-        "cmath": "c"
+        "cmath": "c",
+        "compare": "c"
     },
-    "cortex-debug.variableUseNaturalFormat": true
+    "cortex-debug.variableUseNaturalFormat": false
 }

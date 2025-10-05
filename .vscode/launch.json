@@ -57,6 +57,34 @@
             ],
             /* If you use external loader, add additional arguments */
             //"serverArgs": ["--extload", "path/to/ext/loader.stldr"],
+        },
+        {
+            "name": "DAP link Debug",
+            "cwd": "${workspaceRoot}",
+            // "preLaunchTask": "flash",
+            "executable": "${command:cmake.launchTargetPath}",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "svdPath": "${workspaceRoot}/stm32f407.svd",
+            "configFiles": [
+                "interface/cmsis-dap.cfg",
+                "target/stm32h7x.cfg"
+            ]
+        },
+        {
+            "name": "ST-link Debug",
+            "cwd": "${workspaceRoot}",
+            // "preLaunchTask": "flash",
+            "executable": "${command:cmake.launchTargetPath}",
+            "request": "launch",
+            "type": "cortex-debug",
+            "svdPath": "${workspaceRoot}/stm32f407.svd",
+            "servertype": "openocd",
+            "configFiles": [
+                "interface/stlink-v2.cfg",
+                "target/stm32h7x.cfg"
+            ]
         }
             ]
 }

@@ -133,6 +133,9 @@ int main(void)
   int32_t tmp = 0;
   uint32_t t = 0;
   uint32_t divider = 100;
+  int32_t tmp = 0;
+  uint32_t t = 0;
+  uint32_t divider = 100;
   while (1)
   {
     if(callback_flag == 1)
@@ -140,7 +143,12 @@ int main(void)
       callback_flag = 0;
       dataptr32 = (int32_t*)&data_i2s[0];
       for (uint16_t i = 0; i < AUDIO_BUFF_SIZE / 16; i ++)
+      for (uint16_t i = 0; i < AUDIO_BUFF_SIZE / 16; i ++)
       {
+        tmp = (int32_t)(sin((float)(t%divider) /(float)divider * 2 * 3.141592f) * multiplier);
+        *dataptr32 = tmp;
+        dataptr32++;
+        *dataptr32 = tmp;
         tmp = (int32_t)(sin((float)(t%divider) /(float)divider * 2 * 3.141592f) * multiplier);
         *dataptr32 = tmp;
         dataptr32++;
@@ -156,7 +164,12 @@ int main(void)
       callback_flag = 0;
       dataptr32 = (int32_t*)&data_i2s[AUDIO_BUFF_SIZE/2];
       for (uint16_t i = 0; i < AUDIO_BUFF_SIZE / 16; i ++)
+      for (uint16_t i = 0; i < AUDIO_BUFF_SIZE / 16; i ++)
       {
+        tmp = (int32_t)(sin((float)(t%divider) /(float)divider * 2 * 3.141592f) * multiplier);
+        *dataptr32 = tmp;
+        dataptr32++;
+        *dataptr32 = tmp;
         tmp = (int32_t)(sin((float)(t%divider) /(float)divider * 2 * 3.141592f) * multiplier);
         *dataptr32 = tmp;
         dataptr32++;
