@@ -35,36 +35,14 @@
 #include <string.h>
 #include "spi.h"
 #include "tim.h"
-/* USER CODE END Includes */
 
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
-
-/* USER CODE END PTD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
-
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
-/* Private function prototypes -----------------------------------------------*/
+#include "fatfs.h"
+#include "sdmmc.h"
 void SystemClock_Config(void);
 static void MX_DMA_Init(void);
-/* USER CODE BEGIN PFP */
-void MPU_Config(void);
-/* USER CODE END PFP */
 
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
+void MPU_Config(void);
+
 #ifdef __GNUC__
 #define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
 #else
@@ -77,7 +55,6 @@ PUTCHAR_PROTOTYPE
 }
 
 #define sdram_addr 0xc0000000
-/* USER CODE END 0 */
 
 /**
   * @brief  The application entry point.
@@ -91,7 +68,6 @@ PUTCHAR_PROTOTYPE
 extern SAI_HandleTypeDef hsai_BlockB2;
 
 uint8_t data_i2s[AUDIO_BUFF_SIZE + 4096] = {0,};
-uint32_t t = 0;
 
 void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai)
 {
@@ -107,11 +83,7 @@ int main(void)
 
 
 {
-  /* USER CODE BEGIN 1 */
 	// MPU_Config();
-  /* USER CODE END 1 */
-/* Enable the CPU Cache */
-
   /* Enable I-Cache---------------------------------------------------------*/
   SCB_EnableICache();
 	// SCB_EnableDCache();
@@ -122,16 +94,8 @@ int main(void)
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
   /* Configure the system clock */
   SystemClock_Config();
-
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
@@ -144,39 +108,43 @@ int main(void)
   MX_CRC_Init();
   MX_I2C4_Init();
   MX_DMA_Init();
-  /* USER CODE BEGIN 2 */
 	MX_SPI1_Init();
 	
 	
 	HAL_GPIO_WritePin(LCD_BL_GPIO_Port,LCD_BL_Pin,GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(LCD_DISP_GPIO_Port,LCD_DISP_Pin,GPIO_PIN_RESET);
 	
-  /* USER CODE END 2 */
   
   MX_SAI2_Init();
   MX_TIM2_Init();
+  
+	MX_SDMMC2_SD_Init();
+  MX_FATFS_Init();
 
-
-  /* We should never get here as control is now taken by the scheduler */
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  SAI_SetAudioFrBr(SAI_AUDIO_FREQUENCY_192K, SAI_PROTOCOL_DATASIZE_24BIT, SAI_STEREOMODE );
+  SAI_SetAudioFrBr(SAI_AUDIO_FREQUENCY_192K, SAI_PROTOCOL_DATASIZE_32BIT, SAI_STEREOMODE );
   
   HAL_SAI_Transmit_DMA(&hsai_BlockB2, (uint8_t*)data_i2s, AUDIO_BUFF_SIZE/4);
 
-  int32_t multiplier = 0xFFFFFF / 2; 
-  // int32_t multiplier = 0xFFFFFFFF / 2; 
+
+    // int32_t multiplier = 0xFFFFFF / 2; 
+  int32_t multiplier = 0xFFFFFFFF / 2; 
   // int32_t multiplier = 100000; 
   int32_t * dataptr32;
+  int32_t tmp = 0;
+  uint32_t t = 0;
+  uint32_t divider = 100;
   while (1)
   {
     if(callback_flag == 1)
     {
       callback_flag = 0;
       dataptr32 = (int32_t*)&data_i2s[0];
-      for (uint16_t i = 0; i < AUDIO_BUFF_SIZE / 8; i ++)
+      for (uint16_t i = 0; i < AUDIO_BUFF_SIZE / 16; i ++)
       {
-        *dataptr32 = (int32_t)(sin((float)t / 11.0f) * multiplier);
+        tmp = (int32_t)(sin((float)(t%divider) /(float)divider * 2 * 3.141592f) * multiplier);
+        *dataptr32 = tmp;
+        dataptr32++;
+        *dataptr32 = tmp;
         dataptr32++;
         t++;
         // data_i2s[i] = (int32_t)t ;//& 0x00FFFFFF; 
@@ -187,9 +155,12 @@ int main(void)
     {
       callback_flag = 0;
       dataptr32 = (int32_t*)&data_i2s[AUDIO_BUFF_SIZE/2];
-      for (uint16_t i = 0; i < AUDIO_BUFF_SIZE / 8; i ++)
+      for (uint16_t i = 0; i < AUDIO_BUFF_SIZE / 16; i ++)
       {
-        *dataptr32 = (int32_t)(sin((float)t / 11.0f) * multiplier);
+        tmp = (int32_t)(sin((float)(t%divider) /(float)divider * 2 * 3.141592f) * multiplier);
+        *dataptr32 = tmp;
+        dataptr32++;
+        *dataptr32 = tmp;
         dataptr32++;
         t++;
         // data_i2s[i] = t ;//& 0x00FFFFFF; 

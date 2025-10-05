@@ -44,6 +44,7 @@ ${CMAKE_CURRENT_LIST_DIR}/Core/Src/ltdc.c
 ${CMAKE_CURRENT_LIST_DIR}/Core/Src/quadspi.c
 ${CMAKE_CURRENT_LIST_DIR}/Core/Src/sai.c
 ${CMAKE_CURRENT_LIST_DIR}/Core/Src/spi.c
+${CMAKE_CURRENT_LIST_DIR}/Core/Src/sdmmc.c
 ${CMAKE_CURRENT_LIST_DIR}/Core/Src/stm32h7xx_hal_msp.c
 ${CMAKE_CURRENT_LIST_DIR}/Core/Src/stm32h7xx_hal_timebase_tim.c
 ${CMAKE_CURRENT_LIST_DIR}/Core/Src/stm32h7xx_it.c
