@@ -98,6 +98,15 @@ void Error_Handler(void);
 #define TANK_LVL_Pin 			GPIO_PIN_0
 #define TANK_LVL_Port 		GPIOB
 
+#define KEY1_Pin 			GPIO_PIN_3
+#define KEY1_Port 		GPIOI
+
+#define KEY2_Pin 			GPIO_PIN_4
+#define KEY2_Port 		GPIOH
+
+#define KEY3_Pin 			GPIO_PIN_14
+#define KEY3_Port 		GPIOH
+
 #define AUDIO_CS_Pin 			GPIO_PIN_3
 #define AUDIO_CS_Port 		GPIOD
 // #define ENABLE_SD_DMA_CACHE_MAINTENANCE 1

@@ -158,6 +158,23 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
   HAL_GPIO_Init(AUDIO_CS_Port, &GPIO_InitStruct);
+  
+	/*Configure GPIO pin : KEY1 */
+  GPIO_InitStruct.Pin = KEY1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(KEY1_Port, &GPIO_InitStruct);
+	/*Configure GPIO pin : KEY2 */
+  GPIO_InitStruct.Pin = KEY2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(KEY2_Port, &GPIO_InitStruct);
+	/*Configure GPIO pin : KEY3 */
+  GPIO_InitStruct.Pin = KEY3_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(KEY3_Port, &GPIO_InitStruct);
+
 }
 
 /* USER CODE BEGIN 2 */

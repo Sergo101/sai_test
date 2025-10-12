@@ -78,7 +78,7 @@ set(link_DIRS)
 set(link_LIBS
 cmsis_stm32h7xx
 hal_stm32h7xx
-
+pcm5122
 FatFs
 FatFs_App
 )
@@ -96,6 +96,7 @@ set(linker_OPTS)
 add_subdirectory(Drivers/CMSIS)
 add_subdirectory(Drivers/STM32H7xx_HAL_Driver)
 
+add_subdirectory(Drivers/pcm5122)
 add_subdirectory(Middlewares/Third_Party/FatFs)
 add_subdirectory(FATFS)
 

@@ -39,7 +39,8 @@
 #include "fatfs.h"
 #include "sdmmc.h"
 
-extern SPI_HandleTypeDef hspi1;
+#include "pcm5122.h"
+
 uint8_t spi_txbuff[128] = {0,};
 uint8_t spi_rxbuff[128] = {0,};
 uint8_t volume = 0x60;
@@ -72,7 +73,7 @@ PUTCHAR_PROTOTYPE
   
 #define AUDIO_BUFF_SIZE   4096
 extern SAI_HandleTypeDef hsai_BlockB2;
-
+uint32_t last_vset;
 uint8_t data_i2s[AUDIO_BUFF_SIZE + 4096] = {0,};
 
 void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai)
@@ -125,77 +126,10 @@ int main(void)
 	MX_SDMMC2_SD_Init();
   MX_FATFS_Init();
 
-  spi_txbuff[0] = (0 << 0) + (8 << 1);
-  spi_txbuff[1] = 1 << 2;
-  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
-  HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 2, 1000);
-  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
-  
-  HAL_Delay(1);
-  spi_txbuff[0] = (0 << 0) + (82 << 1);
-  spi_txbuff[1] = 2;
-  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
-  HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 2, 1000);
-  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
+  PCM5122_Init();
 
-  HAL_Delay(1);
-  spi_txbuff[0] = (0 << 0) + (37 << 1);
-  spi_txbuff[1] = 0b1111101;
-  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
-  HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 2, 1000);
-  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
-  
-  HAL_Delay(1);
-  spi_txbuff[0] = (0 << 0) + (65 << 1);
-  spi_txbuff[1] = 0;
-  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
-  HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 2, 1000);
-  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
+  PCM5122_SetVolume(volume, volume);
 
-  HAL_Delay(1);
-  spi_txbuff[0] = (0 << 0) + (4 << 1);
-  spi_txbuff[1] = 1;
-  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
-  HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 2, 1000);
-  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
-
-  HAL_Delay(1);
-  spi_txbuff[0] = (0 << 0) + (13 << 1);
-  spi_txbuff[1] = 1 << 4;
-  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
-  HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 2, 1000);
-  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
-
-  HAL_Delay(1);
-  spi_txbuff[0] = (0 << 0) + (14 << 1);
-  spi_txbuff[1] = 1 << 4;
-  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
-  HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 2, 1000);
-  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
-
-  HAL_Delay(1);
-  spi_txbuff[0] = (0 << 0) + (40 << 1);
-  spi_txbuff[1] = 3;
-  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
-  HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 2, 1000);
-  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
-
-  HAL_Delay(1);
-  spi_txbuff[0] = (0 << 0) + (3 << 1);
-  spi_txbuff[1] = 0;
-  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
-  HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 2, 1000);
-  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
-
-  
-  spi_txbuff[0] = (0 << 0) + (61 << 1);
-  spi_txbuff[1] = volume;
-  spi_txbuff[2] = volume;
-  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
-  HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 3, 1000);
-  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
-
-  
   SAI_SetAudioFrBr(SAI_AUDIO_FREQUENCY_192K, SAI_PROTOCOL_DATASIZE_16BIT, SAI_STEREOMODE );
   
   HAL_SAI_Transmit_DMA(&hsai_BlockB2, (uint8_t*)data_i2s, AUDIO_BUFF_SIZE/2);
@@ -228,11 +162,6 @@ int main(void)
         // data_i2s[i] = (int32_t)t ;//& 0x00FFFFFF; 
         // t+= multiplier;
       }
-      spi_txbuff[0] = (0 << 0) + (86 << 1);
-      spi_txbuff[1] = 1 << 2;
-      HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
-      HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 2, 1000);
-      HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
     }
     if(callback_flag == 2)
     {
@@ -249,6 +178,25 @@ int main(void)
         t++;
         // data_i2s[i] = t ;//& 0x00FFFFFF; 
         // t+= multiplier;
+      }
+      if(!HAL_GPIO_ReadPin(KEY1_Port, KEY1_Pin) && ((HAL_GetTick() - last_vset) > 10) )
+      {
+        if(volume < 0xFF)
+        {
+          volume += 1;
+        }
+        PCM5122_SetVolume(volume, volume);
+        last_vset = HAL_GetTick();
+      }
+      else if (!HAL_GPIO_ReadPin(KEY2_Port, KEY2_Pin) && ((HAL_GetTick() - last_vset) > 10))
+      {
+        if(volume > 0)
+        {
+          volume -= 1;
+        }
+        PCM5122_SetVolume(volume, volume);
+        last_vset = HAL_GetTick();
+
       }
     }
 		// HAL_Delay(500);

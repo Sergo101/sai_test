@@ -1,8 +1,8 @@
 
 #include <stdint.h>
+#include "fatfs.h"
 
 #define AUDIO_BUFF_SIZE   18000/2
-extern SPI_HandleTypeDef hspi1;
 extern SAI_HandleTypeDef hsai_BlockB2;
 
 uint8_t data_i2s[AUDIO_BUFF_SIZE];
