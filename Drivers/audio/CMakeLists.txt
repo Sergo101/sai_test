@@ -1,22 +1,22 @@
 cmake_minimum_required(VERSION 3.20)
 
-set(LIB_NAME FatFs)
+set(LIB_NAME audio)
 
 file(GLOB sources
-  ${CMAKE_CURRENT_LIST_DIR}/src/option/syscall.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/*.c
+  ${CMAKE_CURRENT_LIST_DIR}/Src/*.c
+  ${CMAKE_CURRENT_LIST_DIR}/Src/*.cpp
 )
 
 file(GLOB headers
-  ${CMAKE_CURRENT_LIST_DIR}/src/*.h
+  ${CMAKE_CURRENT_LIST_DIR}/Inc/*.*
 )
 
 set(includes
-  ${CMAKE_CURRENT_LIST_DIR}/src
+  ${CMAKE_CURRENT_LIST_DIR}/Inc
 )
 
 add_library(${LIB_NAME} INTERFACE)
-add_library(lib::FatFs ALIAS ${LIB_NAME})
+add_library(lib::audio ALIAS ${LIB_NAME})
 
 target_sources(${LIB_NAME} INTERFACE ${sources} ${headers})
 target_include_directories(${LIB_NAME} INTERFACE ${includes})

@@ -22,7 +22,10 @@
         "cstdio": "cpp",
         "cstring": "cpp",
         "cmath": "c",
-        "compare": "c"
+        "compare": "c",
+        "files.h": "c",
+        "audio.h": "c",
+        "log.h": "c"
     },
     "cortex-debug.variableUseNaturalFormat": false
 }

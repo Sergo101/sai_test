@@ -5,7 +5,7 @@
 
 #include <string.h>
 
-#define FILENAME_EXTENSION  ".wav"
+#define FILENAME_EXTENSION  ".WAV"
 #define FILENAME_EXTENSION_SIZE  (sizeof(FILENAME_EXTENSION) - 1)
 
 void FindWavFiles(const char *path, Files *files) {

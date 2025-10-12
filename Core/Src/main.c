@@ -36,6 +36,8 @@
 #include "spi.h"
 #include "tim.h"
 
+#include "audio.h"
+
 #include "fatfs.h"
 #include "sdmmc.h"
 
@@ -74,17 +76,7 @@ PUTCHAR_PROTOTYPE
 #define AUDIO_BUFF_SIZE   4096
 extern SAI_HandleTypeDef hsai_BlockB2;
 uint32_t last_vset;
-uint8_t data_i2s[AUDIO_BUFF_SIZE + 4096] = {0,};
-
-void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai)
-{
-  callback_flag = 1;
-}
-
-void HAL_SAI_TxCpltCallback (SAI_HandleTypeDef *hsai)
-{
-  callback_flag = 2;
-}
+uint32_t res = 0;
 
 int main(void)
 {
@@ -125,80 +117,40 @@ int main(void)
   
 	MX_SDMMC2_SD_Init();
   MX_FATFS_Init();
+  
+  res = sd_card_mount();
 
   PCM5122_Init();
 
   PCM5122_SetVolume(volume, volume);
 
-  SAI_SetAudioFrBr(SAI_AUDIO_FREQUENCY_192K, SAI_PROTOCOL_DATASIZE_16BIT, SAI_STEREOMODE );
+  PlayCycleAudio();
   
-  HAL_SAI_Transmit_DMA(&hsai_BlockB2, (uint8_t*)data_i2s, AUDIO_BUFF_SIZE/2);
-  
-  
-  // int32_t multiplier = 0xFFFFFF / 2; 
-  // int32_t multiplier = 0xFFFFFFFF / 2; 
-  int32_t multiplier = 0xFFFF / 2; 
-  int16_t * dataptr32;
-  int16_t tmp = 0;
-  uint32_t t = 0;
-  uint32_t divider = 100;
+  res ++;
   while (1)
   {
-    
-    if(callback_flag == 1)
-    {
-      callback_flag = 0;
-      dataptr32 = (int16_t*)&data_i2s[0];
-      
-      for (uint16_t i = 0; i < AUDIO_BUFF_SIZE / 8; i ++)
-      {
-        
-        tmp = (int16_t)(sin((float)(t%divider) /(float)divider * 2 * 3.141592f) * multiplier);
-        *dataptr32 = tmp;
-        dataptr32++;
-        *dataptr32 = tmp;
-        dataptr32++;
-        t++;
-        // data_i2s[i] = (int32_t)t ;//& 0x00FFFFFF; 
-        // t+= multiplier;
-      }
-    }
-    if(callback_flag == 2)
-    {
-      callback_flag = 0;
-      dataptr32 = (int16_t*)&data_i2s[AUDIO_BUFF_SIZE/2];
-      
-      for (uint16_t i = 0; i < AUDIO_BUFF_SIZE / 8; i ++)
-      {
-        tmp = (int16_t)(sin((float)(t%divider) /(float)divider * 2 * 3.141592f) * multiplier);
-        *dataptr32 = tmp;
-        dataptr32++;
-        *dataptr32 = tmp;
-        dataptr32++;
-        t++;
-        // data_i2s[i] = t ;//& 0x00FFFFFF; 
-        // t+= multiplier;
-      }
-      if(!HAL_GPIO_ReadPin(KEY1_Port, KEY1_Pin) && ((HAL_GetTick() - last_vset) > 10) )
-      {
-        if(volume < 0xFF)
-        {
-          volume += 1;
-        }
-        PCM5122_SetVolume(volume, volume);
-        last_vset = HAL_GetTick();
-      }
-      else if (!HAL_GPIO_ReadPin(KEY2_Port, KEY2_Pin) && ((HAL_GetTick() - last_vset) > 10))
-      {
-        if(volume > 0)
-        {
-          volume -= 1;
-        }
-        PCM5122_SetVolume(volume, volume);
-        last_vset = HAL_GetTick();
+    audioTask();
 
+    if(!HAL_GPIO_ReadPin(KEY1_Port, KEY1_Pin) && ((HAL_GetTick() - last_vset) > 10) )
+    {
+      if(volume < 0xFF)
+      {
+        volume += 1;
       }
+      PCM5122_SetVolume(volume, volume);
+      last_vset = HAL_GetTick();
     }
+    else if (!HAL_GPIO_ReadPin(KEY2_Port, KEY2_Pin) && ((HAL_GetTick() - last_vset) > 10))
+    {
+      if(volume > 0)
+      {
+        volume -= 1;
+      }
+      PCM5122_SetVolume(volume, volume);
+      last_vset = HAL_GetTick();
+
+    }
+
 		// HAL_Delay(500);
     /* USER CODE END WHILE */
 

@@ -32,6 +32,7 @@ extern QSPI_HandleTypeDef hqspi;
 extern TIM_HandleTypeDef htim7;
 extern DMA_HandleTypeDef hdma_sai2_b;
 extern SAI_HandleTypeDef hsai_BlockB2;
+extern SD_HandleTypeDef hsd2;
 
 
 /* USER CODE BEGIN EV */
@@ -216,11 +217,7 @@ void QUADSPI_IRQHandler(void)
   */
 void SDMMC2_IRQHandler(void)
 {
-  /* USER CODE BEGIN SDMMC2_IRQn 0 */
-  /* USER CODE END SDMMC2_IRQn 0 */
-  /* USER CODE BEGIN SDMMC2_IRQn 1 */
-
-  /* USER CODE END SDMMC2_IRQn 1 */
+  HAL_SD_IRQHandler(&hsd2);
 }
 
 /**

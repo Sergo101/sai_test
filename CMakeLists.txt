@@ -38,6 +38,7 @@ ${CMAKE_CURRENT_LIST_DIR}/Core/Src/bsp_sdram.c
 ${CMAKE_CURRENT_LIST_DIR}/Core/Src/crc.c
 ${CMAKE_CURRENT_LIST_DIR}/Core/Src/dma2d.c
 ${CMAKE_CURRENT_LIST_DIR}/Core/Src/fmc.c
+${CMAKE_CURRENT_LIST_DIR}/Core/Src/files.c
 ${CMAKE_CURRENT_LIST_DIR}/Core/Src/gpio.c
 ${CMAKE_CURRENT_LIST_DIR}/Core/Src/i2c.c
 ${CMAKE_CURRENT_LIST_DIR}/Core/Src/ltdc.c
@@ -79,6 +80,7 @@ set(link_LIBS
 cmsis_stm32h7xx
 hal_stm32h7xx
 pcm5122
+audio
 FatFs
 FatFs_App
 )
@@ -95,7 +97,7 @@ set(linker_OPTS)
 
 add_subdirectory(Drivers/CMSIS)
 add_subdirectory(Drivers/STM32H7xx_HAL_Driver)
-
+add_subdirectory(Drivers/audio)
 add_subdirectory(Drivers/pcm5122)
 add_subdirectory(Middlewares/Third_Party/FatFs)
 add_subdirectory(FATFS)

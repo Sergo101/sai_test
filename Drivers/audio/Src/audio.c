@@ -1,8 +1,14 @@
+#include "audio.h"
 
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include "sai.h"
+#include "ff.h"
+#include "files.h"
 #include "fatfs.h"
 
-#define AUDIO_BUFF_SIZE   18000/2
+#define AUDIO_BUFF_SIZE   1800/2
 extern SAI_HandleTypeDef hsai_BlockB2;
 
 uint8_t data_i2s[AUDIO_BUFF_SIZE];
@@ -29,15 +35,16 @@ static const char *GetCurrentFilePath(void) {
   return path;
 }
 
-uint8_t play_record(uint8_t *data, uint16_t data_size){
+uint8_t play_record(uint8_t *data, uint16_t data_size)
+{
   FRESULT fr = FR_NOT_READY;
 	UINT bytesRead = 0;
   
   static uint32_t data_lenght = 0;
   static const char* path_ptr;
   
-  xSemaphoreTake(xSemaphore_fatfs, portMAX_DELAY);
-	if(first_play == 0){
+	if(first_play == 0)
+  {
     if(is_cycle_play)
     {
       path_ptr = GetCurrentFilePath();
@@ -97,7 +104,6 @@ uint8_t play_record(uint8_t *data, uint16_t data_size){
   {
     if(bytesRead < data_size){
       f_close(&wavFile);
-      xSemaphoreGive(xSemaphore_fatfs);
       if(is_cycle_play)
       {
         current_file_index = (current_file_index + 1) % files.count;
@@ -117,27 +123,21 @@ uint8_t play_record(uint8_t *data, uint16_t data_size){
     memset(&wavFile, 0x00, sizeof(FIL));
     first_play = 0;
     file_system_err = 1;
-    xSemaphoreGive(xSemaphore_fatfs);
     return 2;
   }
   
-  xSemaphoreGive(xSemaphore_fatfs);
 	return 1;
 }
 
 
 void HAL_SAI_TxHalfCpltCallback(SAI_HandleTypeDef *hsai)
 {
-  BaseType_t xYeldReq = xTaskResumeFromISR (audioTaskHandle);
   sai_dma_state = 1;
-  portYIELD_FROM_ISR(xYeldReq);
 }
 
 void HAL_SAI_TxCpltCallback (SAI_HandleTypeDef *hsai)
 {
-  BaseType_t xYeldReq = xTaskResumeFromISR (audioTaskHandle);
   sai_dma_state = 2;
-  portYIELD_FROM_ISR(xYeldReq);
 }
 
 void set_cycleplay(uint8_t flag)
@@ -161,18 +161,16 @@ int32_t get_audio_lenght (char* f_ptr)
   uint8_t data[44];
 
   HAL_SAI_DMAStop(&hsai_BlockB2);
-  xSemaphoreTake(xSemaphore_fatfs, portMAX_DELAY);
+
   f_close(&wavFile);
   if(f_open(&wavFile, f_ptr, FA_READ) != FR_OK)
   {
-    xSemaphoreGive(xSemaphore_fatfs);
     return -1;
   }
   
 	// f_lseek(&wavFile, 44);
   f_read(&wavFile, data, 44, &bytesRead);
   f_close(&wavFile);
-  xSemaphoreGive(xSemaphore_fatfs);
   freq = *(uint32_t*)&data[24];
   data_lenght = *(uint16_t*)&data[34];
   ch_num   = *(uint16_t*)&data[22];
@@ -197,9 +195,7 @@ float get_audio_progress (void)
 void PlayAudioByFilename (char* f_ptr)
 {
   HAL_SAI_DMAStop(&hsai_BlockB2);
-  xSemaphoreTake(xSemaphore_fatfs, portMAX_DELAY);
   f_close(&wavFile);
-  xSemaphoreGive(xSemaphore_fatfs);
   snprintf(file_ptr, sizeof(file_ptr), "0:/%s", f_ptr);
   sai_dma_state = 0;
   first_play = 0;
@@ -213,9 +209,7 @@ void PlayCycleAudio (void)
 {
   if(is_cycle_play == 0)
   {
-    xSemaphoreTake(xSemaphore_fatfs, portMAX_DELAY);
     FindWavFiles("0:/", &files);
-    xSemaphoreGive(xSemaphore_fatfs);
   
     sai_dma_state = 0;
     set_cycleplay(1);
@@ -229,9 +223,7 @@ void PlayCycleAudio (void)
 
 void PlayNext (void)
 {
-  xSemaphoreTake(xSemaphore_fatfs, portMAX_DELAY);
   f_close(&wavFile);
-  xSemaphoreGive(xSemaphore_fatfs);
   current_file_index = (current_file_index + 1) % files.count;
 	first_play = 0;
   HAL_SAI_DMAStop(&hsai_BlockB2);
@@ -244,7 +236,6 @@ void audioTask (void)
   uint8_t state = 0;
 
   sai_dma_state = 0;
-  xSemaphoreTake(xSemaphore_fatfs, portMAX_DELAY);
   if(sd_card_mount() == FR_OK)
   {
     file_system_err = 0;
@@ -253,7 +244,6 @@ void audioTask (void)
   {
     file_system_err = 1;
   }
-  xSemaphoreGive(xSemaphore_fatfs);
   while (1)
   {
     if (sai_dma_state == 0)
@@ -291,7 +281,6 @@ void audioTask (void)
         sai_dma_state = 0;
       }
     }
-    vTaskSuspend (NULL);
     // osThreadSuspend(audioTaskHandle);
   }
   // HAL_StatusTypeDef HAL_SAI_Transmit_DMA(SAI_HandleTypeDef *hsai, uint8_t *pData, uint16_t Size);
