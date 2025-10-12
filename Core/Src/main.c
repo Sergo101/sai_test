@@ -38,6 +38,12 @@
 
 #include "fatfs.h"
 #include "sdmmc.h"
+
+extern SPI_HandleTypeDef hspi1;
+uint8_t spi_txbuff[128] = {0,};
+uint8_t spi_rxbuff[128] = {0,};
+uint8_t volume = 0x60;
+
 void SystemClock_Config(void);
 static void MX_DMA_Init(void);
 
@@ -80,8 +86,6 @@ void HAL_SAI_TxCpltCallback (SAI_HandleTypeDef *hsai)
 }
 
 int main(void)
-
-
 {
 	// MPU_Config();
   /* Enable I-Cache---------------------------------------------------------*/
@@ -121,35 +125,101 @@ int main(void)
 	MX_SDMMC2_SD_Init();
   MX_FATFS_Init();
 
-  SAI_SetAudioFrBr(SAI_AUDIO_FREQUENCY_192K, SAI_PROTOCOL_DATASIZE_32BIT, SAI_STEREOMODE );
+  spi_txbuff[0] = (0 << 0) + (8 << 1);
+  spi_txbuff[1] = 1 << 2;
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
+  HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 2, 1000);
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
   
-  HAL_SAI_Transmit_DMA(&hsai_BlockB2, (uint8_t*)data_i2s, AUDIO_BUFF_SIZE/4);
+  HAL_Delay(1);
+  spi_txbuff[0] = (0 << 0) + (82 << 1);
+  spi_txbuff[1] = 2;
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
+  HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 2, 1000);
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
 
+  HAL_Delay(1);
+  spi_txbuff[0] = (0 << 0) + (37 << 1);
+  spi_txbuff[1] = 0b1111101;
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
+  HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 2, 1000);
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
+  
+  HAL_Delay(1);
+  spi_txbuff[0] = (0 << 0) + (65 << 1);
+  spi_txbuff[1] = 0;
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
+  HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 2, 1000);
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
 
-    // int32_t multiplier = 0xFFFFFF / 2; 
-  int32_t multiplier = 0xFFFFFFFF / 2; 
-  // int32_t multiplier = 100000; 
-  int32_t * dataptr32;
-  int32_t tmp = 0;
-  uint32_t t = 0;
-  uint32_t divider = 100;
-  int32_t tmp = 0;
+  HAL_Delay(1);
+  spi_txbuff[0] = (0 << 0) + (4 << 1);
+  spi_txbuff[1] = 1;
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
+  HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 2, 1000);
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
+
+  HAL_Delay(1);
+  spi_txbuff[0] = (0 << 0) + (13 << 1);
+  spi_txbuff[1] = 1 << 4;
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
+  HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 2, 1000);
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
+
+  HAL_Delay(1);
+  spi_txbuff[0] = (0 << 0) + (14 << 1);
+  spi_txbuff[1] = 1 << 4;
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
+  HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 2, 1000);
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
+
+  HAL_Delay(1);
+  spi_txbuff[0] = (0 << 0) + (40 << 1);
+  spi_txbuff[1] = 3;
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
+  HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 2, 1000);
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
+
+  HAL_Delay(1);
+  spi_txbuff[0] = (0 << 0) + (3 << 1);
+  spi_txbuff[1] = 0;
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
+  HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 2, 1000);
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
+
+  
+  spi_txbuff[0] = (0 << 0) + (61 << 1);
+  spi_txbuff[1] = volume;
+  spi_txbuff[2] = volume;
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
+  HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 3, 1000);
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
+
+  
+  SAI_SetAudioFrBr(SAI_AUDIO_FREQUENCY_192K, SAI_PROTOCOL_DATASIZE_16BIT, SAI_STEREOMODE );
+  
+  HAL_SAI_Transmit_DMA(&hsai_BlockB2, (uint8_t*)data_i2s, AUDIO_BUFF_SIZE/2);
+  
+  
+  // int32_t multiplier = 0xFFFFFF / 2; 
+  // int32_t multiplier = 0xFFFFFFFF / 2; 
+  int32_t multiplier = 0xFFFF / 2; 
+  int16_t * dataptr32;
+  int16_t tmp = 0;
   uint32_t t = 0;
   uint32_t divider = 100;
   while (1)
   {
+    
     if(callback_flag == 1)
     {
       callback_flag = 0;
-      dataptr32 = (int32_t*)&data_i2s[0];
-      for (uint16_t i = 0; i < AUDIO_BUFF_SIZE / 16; i ++)
-      for (uint16_t i = 0; i < AUDIO_BUFF_SIZE / 16; i ++)
+      dataptr32 = (int16_t*)&data_i2s[0];
+      
+      for (uint16_t i = 0; i < AUDIO_BUFF_SIZE / 8; i ++)
       {
-        tmp = (int32_t)(sin((float)(t%divider) /(float)divider * 2 * 3.141592f) * multiplier);
-        *dataptr32 = tmp;
-        dataptr32++;
-        *dataptr32 = tmp;
-        tmp = (int32_t)(sin((float)(t%divider) /(float)divider * 2 * 3.141592f) * multiplier);
+        
+        tmp = (int16_t)(sin((float)(t%divider) /(float)divider * 2 * 3.141592f) * multiplier);
         *dataptr32 = tmp;
         dataptr32++;
         *dataptr32 = tmp;
@@ -158,19 +228,20 @@ int main(void)
         // data_i2s[i] = (int32_t)t ;//& 0x00FFFFFF; 
         // t+= multiplier;
       }
+      spi_txbuff[0] = (0 << 0) + (86 << 1);
+      spi_txbuff[1] = 1 << 2;
+      HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_RESET);
+      HAL_SPI_TransmitReceive(&hspi1, spi_txbuff, spi_rxbuff, 2, 1000);
+      HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
     }
     if(callback_flag == 2)
     {
       callback_flag = 0;
-      dataptr32 = (int32_t*)&data_i2s[AUDIO_BUFF_SIZE/2];
-      for (uint16_t i = 0; i < AUDIO_BUFF_SIZE / 16; i ++)
-      for (uint16_t i = 0; i < AUDIO_BUFF_SIZE / 16; i ++)
+      dataptr32 = (int16_t*)&data_i2s[AUDIO_BUFF_SIZE/2];
+      
+      for (uint16_t i = 0; i < AUDIO_BUFF_SIZE / 8; i ++)
       {
-        tmp = (int32_t)(sin((float)(t%divider) /(float)divider * 2 * 3.141592f) * multiplier);
-        *dataptr32 = tmp;
-        dataptr32++;
-        *dataptr32 = tmp;
-        tmp = (int32_t)(sin((float)(t%divider) /(float)divider * 2 * 3.141592f) * multiplier);
+        tmp = (int16_t)(sin((float)(t%divider) /(float)divider * 2 * 3.141592f) * multiplier);
         *dataptr32 = tmp;
         dataptr32++;
         *dataptr32 = tmp;
@@ -179,7 +250,6 @@ int main(void)
         // data_i2s[i] = t ;//& 0x00FFFFFF; 
         // t+= multiplier;
       }
-      HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin);
     }
 		// HAL_Delay(500);
     /* USER CODE END WHILE */

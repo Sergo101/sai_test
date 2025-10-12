@@ -97,6 +97,9 @@ void Error_Handler(void);
 
 #define TANK_LVL_Pin 			GPIO_PIN_0
 #define TANK_LVL_Port 		GPIOB
+
+#define AUDIO_CS_Pin 			GPIO_PIN_3
+#define AUDIO_CS_Port 		GPIOD
 // #define ENABLE_SD_DMA_CACHE_MAINTENANCE 1
 /* USER CODE BEGIN Private defines */
 

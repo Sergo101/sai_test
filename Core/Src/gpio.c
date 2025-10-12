@@ -145,12 +145,19 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_WritePin(STEP_ENABLE_Port, STEP_ENABLE_Pin, GPIO_PIN_SET);
   HAL_GPIO_Init(STEP_ENABLE_Port, &GPIO_InitStruct);
-
+  
 	/*Configure GPIO pin : tank level input */
   GPIO_InitStruct.Pin = TANK_LVL_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(TANK_LVL_Port, &GPIO_InitStruct);
+  
+	/*Configure GPIO pin : CS audio codeck */
+  GPIO_InitStruct.Pin = AUDIO_CS_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_WritePin(AUDIO_CS_Port, AUDIO_CS_Pin, GPIO_PIN_SET);
+  HAL_GPIO_Init(AUDIO_CS_Port, &GPIO_InitStruct);
 }
 
 /* USER CODE BEGIN 2 */
