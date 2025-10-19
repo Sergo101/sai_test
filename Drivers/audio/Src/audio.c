@@ -9,7 +9,7 @@
 #include "fatfs.h"
 #include "pcm5122.h"
 
-#define AUDIO_BUFF_SIZE   1024 * 8
+#define AUDIO_BUFF_SIZE   1024 * 4
 extern SAI_HandleTypeDef hsai_BlockB2;
 
 uint8_t data_i2s[AUDIO_BUFF_SIZE];
@@ -67,22 +67,26 @@ uint8_t play_record(uint8_t *data, uint16_t data_size)
     uint8_t cmp;
 		if (fr == FR_OK)
 		{
-      f_read(&wavFile, data, 256, &bytesRead);
 		  f_lseek(&wavFile, 12);
       
+      cmp = 0;
       do{
         fr |= f_read(&wavFile, subchunk_header, 4, &bytesRead);
         fr |= f_read(&wavFile, &subchunk_size, 4, &bytesRead);
 
-        cmp = 0;
         if(!strncmp((char*)subchunk_header, "fmt ", 4))
         {
           fr |= f_read(&wavFile, data, subchunk_size, &bytesRead);
           audio_format   = *(uint16_t*)&data[0];
-          ch_num   = *(uint16_t*)&data[22 - 20];
-          freq = *(uint32_t*)&data[24 - 20];
+          ch_num   = *(uint16_t*)&data[2];
+          freq = *(uint32_t*)&data[4];
 
-          byte_rate = *(uint32_t*)&data[28 - 20];
+          byte_rate = *(uint32_t*)&data[8];
+          uint16_t block_align = *(uint16_t*)&data[12];
+          uint16_t bps = *(uint16_t*)&data[14];
+          uint16_t cbsize = *(uint16_t*)&data[16];
+          uint16_t vbps = *(uint16_t*)&data[18];
+
           data_lenght = *(uint16_t*)&data[34 - 20];
         }
         else if (!strncmp((char*)subchunk_header, "data", 4))
@@ -125,10 +129,9 @@ uint8_t play_record(uint8_t *data, uint16_t data_size)
       SAI_SetAudioFrBr (freq, baudrate_set, mode_set);
 		}
 		first_play = 1;
-    f_lseek(&wavFile, 48);
+    // f_read(&wavFile, data, 2, &bytesRead);
 	}
   
-	// f_read(&wavFile, data, data_size, &bytesRead);
   fr = f_read(&wavFile, data, data_size, &bytesRead);
   if(fr==FR_OK)
   {
@@ -265,10 +268,7 @@ void audioTask (void)
 {
   uint8_t state = 0;
 
-  if (sai_dma_state == 0)
-  {
-  }
-  else if (sai_dma_state == 1)
+  if (sai_dma_state == 1)
   {
     state = play_record(((uint8_t*)data_i2s), AUDIO_BUFF_SIZE/2);
     if ( state == 0)
@@ -283,7 +283,7 @@ void audioTask (void)
     }
     sai_dma_state = 0;
   }
-  else
+  else if (sai_dma_state == 2)
   {
     state = play_record((((uint8_t*)data_i2s)  + AUDIO_BUFF_SIZE/2), AUDIO_BUFF_SIZE/2);
     if ( state == 0)

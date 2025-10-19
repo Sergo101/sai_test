@@ -125,8 +125,8 @@ int main(void)
 
   PCM5122_SetVolume(volume, volume);
 
-  // PlayCycleAudio();
-  PlayAudioByFilename("32BITS.WAV");
+  PlayCycleAudio();
+  // PlayAudioByFilename("32.WAV");
   
   res ++;
   while (1)
