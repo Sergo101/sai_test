@@ -39,3 +39,27 @@ void PCM5122_SetVolume (uint8_t l_vol, uint8_t r_vol)
   HAL_SPI_Transmit(&PCM5122_SPI_INSTANCE, spi_txtmp, 3, 1000);
   HAL_GPIO_WritePin(PCM5122_CS_PORT, PCM5122_CS_PIN, GPIO_PIN_SET);
 }
+
+void PCM5122_SetBaudrate(uint8_t baudrate)
+{
+  uint8_t reg = 0;
+  switch(baudrate)
+  {
+    case 16:
+    {
+      reg = 0;
+      break;
+    }
+    case 24:
+    {
+      reg = 2;
+      break;
+    }
+    case 32:
+    {
+      reg = 2;
+      break;
+    }
+  }
+  PCM5122_WriteReg(PCM51XX_REG_I2S_CONFIG, reg);
+}

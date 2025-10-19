@@ -76,6 +76,7 @@ PUTCHAR_PROTOTYPE
 #define AUDIO_BUFF_SIZE   4096
 extern SAI_HandleTypeDef hsai_BlockB2;
 uint32_t last_vset;
+uint8_t next_track = 0;
 uint32_t res = 0;
 
 int main(void)
@@ -124,7 +125,8 @@ int main(void)
 
   PCM5122_SetVolume(volume, volume);
 
-  PlayCycleAudio();
+  // PlayCycleAudio();
+  PlayAudioByFilename("32BITS.WAV");
   
   res ++;
   while (1)
@@ -148,7 +150,16 @@ int main(void)
       }
       PCM5122_SetVolume(volume, volume);
       last_vset = HAL_GetTick();
+    }
 
+    if(!HAL_GPIO_ReadPin(KEY3_Port, KEY3_Pin) && !next_track)
+    {
+      PlayNext();
+      next_track = 1;
+    }
+    else
+    {
+      next_track = 0;
     }
 
 		// HAL_Delay(500);

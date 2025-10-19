@@ -75,6 +75,7 @@ void SAI_SetAudioFrBr (uint32_t Freq, uint32_t Datasize, uint32_t Stereomode)
 {
   hsai_BlockB2.Init.AudioFrequency = Freq;
   hsai_BlockB2.Init.MonoStereoMode = Stereomode;
+
   if (HAL_SAI_InitProtocol(&hsai_BlockB2, SAI_I2S_STANDARD, Datasize, 2) != HAL_OK)
   {
     Error_Handler();
