@@ -9,7 +9,7 @@
 #include "fatfs.h"
 #include "pcm5122.h"
 
-#define AUDIO_BUFF_SIZE   1024 * 4
+#define AUDIO_BUFF_SIZE   512 * 2
 extern SAI_HandleTypeDef hsai_BlockB2;
 
 uint8_t data_i2s[AUDIO_BUFF_SIZE];
@@ -56,49 +56,18 @@ uint8_t play_record(uint8_t *data, uint16_t data_size)
     }
 		fr = f_open(&wavFile, path_ptr, FA_READ);
 
-    uint16_t audio_format = 0;
-    uint16_t ch_num = 0;
     uint32_t freq = 0;
-    uint32_t byte_rate = 0;
+    uint16_t ch_num = 0;
     uint32_t baudrate_set = 0;
     uint32_t mode_set = 0;
-    uint8_t subchunk_header[4];
-    uint32_t subchunk_size;
-    uint8_t cmp;
+
 		if (fr == FR_OK)
 		{
-		  f_lseek(&wavFile, 12);
-      
-      cmp = 0;
-      do{
-        fr |= f_read(&wavFile, subchunk_header, 4, &bytesRead);
-        fr |= f_read(&wavFile, &subchunk_size, 4, &bytesRead);
-
-        if(!strncmp((char*)subchunk_header, "fmt ", 4))
-        {
-          fr |= f_read(&wavFile, data, subchunk_size, &bytesRead);
-          audio_format   = *(uint16_t*)&data[0];
-          ch_num   = *(uint16_t*)&data[2];
-          freq = *(uint32_t*)&data[4];
-
-          byte_rate = *(uint32_t*)&data[8];
-          uint16_t block_align = *(uint16_t*)&data[12];
-          uint16_t bps = *(uint16_t*)&data[14];
-          uint16_t cbsize = *(uint16_t*)&data[16];
-          uint16_t vbps = *(uint16_t*)&data[18];
-
-          data_lenght = *(uint16_t*)&data[34 - 20];
-        }
-        else if (!strncmp((char*)subchunk_header, "data", 4))
-        {
-         cmp = 1;
-        }
-        else
-        {
-          f_lseek(&wavFile, f_tell(&wavFile) + subchunk_size);
-        }
-      } while ((fr == FR_OK) && !cmp);
-      
+		  // f_lseek(&wavFile, 44);
+      f_read(&wavFile, data, 46, &bytesRead);
+      freq = *(uint32_t*)&data[24];
+      data_lenght = *(uint16_t*)&data[34];
+      ch_num   = *(uint16_t*)&data[22];
       switch (data_lenght)
       {
         case 16:
@@ -117,7 +86,6 @@ uint8_t play_record(uint8_t *data, uint16_t data_size)
         baudrate_set = 0;
         break;
       }
-      // PCM5122_SetBaudrate(data_lenght);
       if (ch_num == 1)
       {
         mode_set = SAI_MONOMODE;
@@ -129,7 +97,6 @@ uint8_t play_record(uint8_t *data, uint16_t data_size)
       SAI_SetAudioFrBr (freq, baudrate_set, mode_set);
 		}
 		first_play = 1;
-    // f_read(&wavFile, data, 2, &bytesRead);
 	}
   
   fr = f_read(&wavFile, data, data_size, &bytesRead);

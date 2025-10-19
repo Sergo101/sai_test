@@ -25,7 +25,8 @@
         "compare": "c",
         "files.h": "c",
         "audio.h": "c",
-        "log.h": "c"
+        "log.h": "c",
+        "sdmmc.h": "c"
     },
     "cortex-debug.variableUseNaturalFormat": true
 }

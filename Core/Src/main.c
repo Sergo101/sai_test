@@ -72,9 +72,6 @@ PUTCHAR_PROTOTYPE
 
   uint8_t callback_flag = 0;
   
-  
-#define AUDIO_BUFF_SIZE   4096
-extern SAI_HandleTypeDef hsai_BlockB2;
 uint32_t last_vset;
 uint8_t next_track = 0;
 uint32_t res = 0;
@@ -83,7 +80,7 @@ int main(void)
 {
 	// MPU_Config();
   /* Enable I-Cache---------------------------------------------------------*/
-  SCB_EnableICache();
+  // SCB_EnableICache();
 	// SCB_EnableDCache();
 	
 	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
@@ -126,7 +123,12 @@ int main(void)
   PCM5122_SetVolume(volume, volume);
 
   PlayCycleAudio();
+  
+
+  // PlayAudioByFilename("COTTON~2.WAV");
+  // PlayAudioByFilename("RUSH-T~1.WAV");
   // PlayAudioByFilename("32.WAV");
+  // PlayAudioByFilename("16BITS.WAV");
   
   res ++;
   while (1)
