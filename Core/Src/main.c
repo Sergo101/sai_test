@@ -154,10 +154,13 @@ int main(void)
       last_vset = HAL_GetTick();
     }
 
-    if(!HAL_GPIO_ReadPin(KEY3_Port, KEY3_Pin) && !next_track)
+    if(!HAL_GPIO_ReadPin(KEY3_Port, KEY3_Pin))
     {
-      PlayNext();
-      next_track = 1;
+      if(!next_track)
+      {
+        PlayNext();
+        next_track = 1;
+      }
     }
     else
     {
