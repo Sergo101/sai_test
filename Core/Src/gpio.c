@@ -174,6 +174,11 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(KEY3_Port, &GPIO_InitStruct);
+	/*Configure GPIO pin : AUDIO_OUTSEL */
+  GPIO_InitStruct.Pin = AUDIO_OUTSEL_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(AUDIO_OUTSEL_Port, &GPIO_InitStruct);
 
 }
 

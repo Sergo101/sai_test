@@ -95,6 +95,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
+  HAL_GPIO_WritePin(AUDIO_OUTSEL_Port, AUDIO_OUTSEL_Pin, GPIO_PIN_RESET);
   
   
   MX_FMC_Init();

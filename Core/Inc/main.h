@@ -109,6 +109,9 @@ void Error_Handler(void);
 
 #define AUDIO_CS_Pin 			GPIO_PIN_3
 #define AUDIO_CS_Port 		GPIOD
+
+#define AUDIO_OUTSEL_Pin 			GPIO_PIN_1
+#define AUDIO_OUTSEL_Port 		GPIOA
 // #define ENABLE_SD_DMA_CACHE_MAINTENANCE 1
 /* USER CODE BEGIN Private defines */
 
