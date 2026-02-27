@@ -149,6 +149,7 @@ typedef enum {
 void PCM5122_Init (void);
 void PCM5122_SetVolume (uint8_t l_vol, uint8_t r_vol);
 void PCM5122_SetBaudrate(uint8_t baudrate);
+void PCM5122_Reset (void);
 
 #endif
 

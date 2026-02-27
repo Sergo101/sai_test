@@ -118,7 +118,7 @@ int main(void)
   MX_FATFS_Init();
   
   res = sd_card_mount();
-
+  PCM5122_Reset ();
   PCM5122_Init();
 
   PCM5122_SetVolume(volume, volume);

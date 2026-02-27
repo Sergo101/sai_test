@@ -16,8 +16,9 @@ HAL_StatusTypeDef PCM5122_WriteReg(uint8_t reg, uint8_t val)
 
 void PCM5122_Init (void)
 {
-  PCM5122_WriteReg(PCM51XX_REG_GPIO_ENABLE, 1 << 2);
-  PCM5122_WriteReg(PCM51XX_REG_GPIO3_OUTPUT, 2);
+  PCM5122_WriteReg(PCM51XX_REG_PAGE_SELECT, 0);
+  // PCM5122_WriteReg(PCM51XX_REG_GPIO_ENABLE, 1 << 2);
+  // PCM5122_WriteReg(PCM51XX_REG_GPIO3_OUTPUT, 2);
   /* Disable all error detection */
   PCM5122_WriteReg(PCM51XX_REG_ERROR_DETECT, 0x7D);
   PCM5122_WriteReg(PCM51XX_REG_AUTO_MUTE, 0);
@@ -35,6 +36,7 @@ void PCM5122_SetVolume (uint8_t l_vol, uint8_t r_vol)
   spi_txtmp[0] = PCM51XX_REG_DIGITAL_VOLUME_L << 1;
   spi_txtmp[1] = l_vol;
   spi_txtmp[2] = r_vol;
+  PCM5122_WriteReg(PCM51XX_REG_PAGE_SELECT, 0);
   HAL_GPIO_WritePin(PCM5122_CS_PORT, PCM5122_CS_PIN, GPIO_PIN_RESET);
   HAL_SPI_Transmit(&PCM5122_SPI_INSTANCE, spi_txtmp, 3, 1000);
   HAL_GPIO_WritePin(PCM5122_CS_PORT, PCM5122_CS_PIN, GPIO_PIN_SET);
@@ -62,4 +64,13 @@ void PCM5122_SetBaudrate(uint8_t baudrate)
     }
   }
   PCM5122_WriteReg(PCM51XX_REG_I2S_CONFIG, reg);
+}
+
+void PCM5122_Reset (void)
+{
+  PCM5122_WriteReg(PCM51XX_REG_PAGE_SELECT, 0);
+  PCM5122_WriteReg(PCM51XX_REG_STANDBY, (1 << 4) + 1);
+  PCM5122_WriteReg(PCM51XX_REG_RESET, (1 << 4) + 1);
+  PCM5122_WriteReg(PCM51XX_REG_RESET, 0);
+  PCM5122_WriteReg(PCM51XX_REG_STANDBY, 0);
 }
