@@ -82,7 +82,7 @@
 /* #define HAL_SMARTCARD_MODULE_ENABLED   */
 /* #define HAL_WWDG_MODULE_ENABLED   */
 /* #define HAL_PCD_MODULE_ENABLED   */
-/* #define HAL_HCD_MODULE_ENABLED   */
+#define HAL_HCD_MODULE_ENABLED
 /* #define HAL_DFSDM_MODULE_ENABLED   */
 /* #define HAL_DSI_MODULE_ENABLED   */
 /* #define HAL_JPEG_MODULE_ENABLED   */
@@ -242,6 +242,7 @@
 /**
   * @brief Include module's header file
   */
+#include "stm32h7xx_ll_usb.h"
 
 #ifdef HAL_RCC_MODULE_ENABLED
   #include "stm32h7xx_hal_rcc.h"

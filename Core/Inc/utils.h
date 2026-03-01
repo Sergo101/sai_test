@@ -106,7 +106,7 @@ extern "C" {
     \brief Форматный вывод текста
     \warning Используется только в режиме отладки (при объявленном макросе DEBUG).
   */
-  #define PRINTF(format, args...)                 printf(format, args)
+  // #define PRINTF(format, args...)                 printf(format, args)
 
   /*!
     \brief Вывод текста

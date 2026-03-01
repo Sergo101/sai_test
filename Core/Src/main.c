@@ -41,11 +41,32 @@
 #include "fatfs.h"
 #include "sdmmc.h"
 
+#include "usbh_core.h"
+#include "usbh_msc.h"
+#include "ff.h"
+#include "ff_gen_drv.h"
+#include "usbh_diskio.h"
+
 #include "pcm5122.h"
+
+
+typedef enum {
+  APPLICATION_IDLE = 0,
+  APPLICATION_READY,
+  APPLICATION_DISCONNECT,
+}MSC_ApplicationTypeDef;
+
+USBH_HandleTypeDef hUSB_Host;
+MSC_ApplicationTypeDef Appli_state = APPLICATION_IDLE;
+FATFS USBH_fatfs;
+char USBDISKPath[4];            /* USB Host logical drive path */
+#define HSEM_ID_0 (0U) /* HW semaphore 0*/
 
 uint8_t spi_txbuff[128] = {0,};
 uint8_t spi_rxbuff[128] = {0,};
 uint8_t volume = 0x60;
+
+USBH_StatusTypeDef ret = 0;
 
 void SystemClock_Config(void);
 static void MX_DMA_Init(void);
@@ -64,7 +85,7 @@ PUTCHAR_PROTOTYPE
 }
 
 #define sdram_addr 0xc0000000
-
+#define USB_HOST_FS
 /**
   * @brief  The application entry point.
   * @retval int
@@ -75,6 +96,62 @@ PUTCHAR_PROTOTYPE
 uint32_t last_vset;
 uint8_t next_track = 0;
 uint32_t res = 0;
+
+uint8_t usb_mount = 0;
+
+/**
+* @brief  User Process
+* @param  phost: Host Handle
+* @param  id: Host Library user message ID
+* @retval None
+*/
+static void USBH_UserProcess(USBH_HandleTypeDef * phost, uint8_t id)
+{
+  switch (id)
+  {
+  case HOST_USER_SELECT_CONFIGURATION:
+    break;
+
+  case HOST_USER_DISCONNECTION:
+    Appli_state = APPLICATION_DISCONNECT;
+    if (f_mount(NULL, "", 0) != FR_OK)
+    {
+      // LCD_DbgTrace("ERROR : Cannot DeInitialize FatFs! \n");
+    }
+    if (FATFS_UnLinkDriver(USBDISKPath) != 0)
+    {
+      // LCD_DbgTrace("ERROR : Cannot UnLink FatFS Driver! \n");
+    }
+    usb_mount = 0;
+    break;
+
+  case HOST_USER_CLASS_ACTIVE:
+    if (FATFS_LinkDriver(&USBH_Driver, USBDISKPath) == 0)
+    {
+      if (f_mount(&USBH_fatfs, USBDISKPath, 1) != FR_OK)
+      {
+        __NOP();
+        // LCD_DbgTrace("ERROR : Cannot Initialize FatFs! \n");
+      }
+    }
+    usb_mount = 1;
+    break;
+
+  case HOST_USER_CONNECTION:
+    // if (FATFS_LinkDriver(&USBH_Driver, USBDISKPath) == 0)
+    // {
+    //   if (f_mount(&USBH_fatfs, USBDISKPath, 0) != FR_OK)
+    //   {
+    //     __NOP();
+    //     // LCD_DbgTrace("ERROR : Cannot Initialize FatFs! \n");
+    //   }
+    // }
+    break;
+
+  default:
+    break;
+  }
+}
 
 int main(void)
 {
@@ -115,26 +192,49 @@ int main(void)
   MX_TIM2_Init();
   
 	MX_SDMMC2_SD_Init();
-  MX_FATFS_Init();
+
+  #ifdef USB_HOST_FS
+  /* Enable the USB voltage level detector */
+  HAL_PWREx_EnableUSBVoltageDetector();
+
+  /* Init Host Library */
+  ret = USBH_Init(&hUSB_Host, USBH_UserProcess, 0);
+
+  /* Add Supported Class */
+  ret = USBH_RegisterClass(&hUSB_Host, USBH_MSC_CLASS);
+
+  /* Start Host Process */
+  ret = USBH_Start(&hUSB_Host);
+  #endif
+
+  // MX_FATFS_Init();
   
-  res = sd_card_mount();
+  // res = sd_card_mount();
   PCM5122_Reset ();
   PCM5122_Init();
 
   PCM5122_SetVolume(volume, volume);
 
-  PlayCycleAudio();
   
-
+  
   // PlayAudioByFilename("COTTON~2.WAV");
   // PlayAudioByFilename("RUSH-T~1.WAV");
   // PlayAudioByFilename("32.WAV");
   // PlayAudioByFilename("16BITS.WAV");
-  
+  uint8_t isInit = 0;
   res ++;
   while (1)
   {
-    audioTask();
+    USBH_Process(&hUSB_Host);
+    if(usb_mount)
+    {
+      if(!isInit)
+      {
+        PlayCycleAudio();
+        isInit = 1;
+      }
+      audioTask();
+    }
 
     if(!HAL_GPIO_ReadPin(KEY1_Port, KEY1_Pin) && ((HAL_GetTick() - last_vset) > 10) )
     {
@@ -184,7 +284,7 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct;
   /** Supply configuration update enable
   */
   HAL_PWREx_ConfigSupply(PWR_LDO_SUPPLY);
@@ -203,15 +303,16 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48|RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 5;
   RCC_OscInitStruct.PLL.PLLN = 192;
   RCC_OscInitStruct.PLL.PLLP = 2;
-  RCC_OscInitStruct.PLL.PLLQ = 8;
-  RCC_OscInitStruct.PLL.PLLR = 4;
+  RCC_OscInitStruct.PLL.PLLQ = 2;
+  RCC_OscInitStruct.PLL.PLLR = 2;
   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_2;
   RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
   RCC_OscInitStruct.PLL.PLLFRACN = 0;
@@ -219,6 +320,20 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+
+  
+  PeriphClkInitStruct.PLL3.PLL3M = 5;
+  PeriphClkInitStruct.PLL3.PLL3N = 96;
+  PeriphClkInitStruct.PLL3.PLL3P = 2;
+  PeriphClkInitStruct.PLL3.PLL3Q = 10;
+  PeriphClkInitStruct.PLL3.PLL3R = 18;
+
+  PeriphClkInitStruct.PLL3.PLL3VCOSEL = RCC_PLL3VCOWIDE;
+  PeriphClkInitStruct.PLL3.PLL3RGE = RCC_PLL3VCIRANGE_2;
+
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USB;
+  PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_PLL3;
+  HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
 
   /** Initializes the CPU, AHB and APB buses clocks
   */

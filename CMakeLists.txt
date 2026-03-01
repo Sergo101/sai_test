@@ -33,26 +33,29 @@ set(cpu_PARAMS
 )
 
 # Sources
-set(sources_SRCS
-${CMAKE_CURRENT_LIST_DIR}/Core/Src/bsp_sdram.c
-${CMAKE_CURRENT_LIST_DIR}/Core/Src/crc.c
-${CMAKE_CURRENT_LIST_DIR}/Core/Src/dma2d.c
-${CMAKE_CURRENT_LIST_DIR}/Core/Src/fmc.c
-${CMAKE_CURRENT_LIST_DIR}/Core/Src/files.c
-${CMAKE_CURRENT_LIST_DIR}/Core/Src/gpio.c
-${CMAKE_CURRENT_LIST_DIR}/Core/Src/i2c.c
-${CMAKE_CURRENT_LIST_DIR}/Core/Src/ltdc.c
-${CMAKE_CURRENT_LIST_DIR}/Core/Src/quadspi.c
-${CMAKE_CURRENT_LIST_DIR}/Core/Src/sai.c
-${CMAKE_CURRENT_LIST_DIR}/Core/Src/spi.c
-${CMAKE_CURRENT_LIST_DIR}/Core/Src/sdmmc.c
-${CMAKE_CURRENT_LIST_DIR}/Core/Src/stm32h7xx_hal_msp.c
-${CMAKE_CURRENT_LIST_DIR}/Core/Src/stm32h7xx_hal_timebase_tim.c
-${CMAKE_CURRENT_LIST_DIR}/Core/Src/stm32h7xx_it.c
-${CMAKE_CURRENT_LIST_DIR}/Core/Src/system_stm32h7xx.c
-${CMAKE_CURRENT_LIST_DIR}/Core/Src/usart.c
-${CMAKE_CURRENT_LIST_DIR}/Core/Src/tim.c
+file(GLOB sources_SRCS
+${CMAKE_CURRENT_LIST_DIR}/Core/Src/*.c
 )
+# set(sources_SRCS
+# ${CMAKE_CURRENT_LIST_DIR}/Core/Src/bsp_sdram.c
+# ${CMAKE_CURRENT_LIST_DIR}/Core/Src/crc.c
+# ${CMAKE_CURRENT_LIST_DIR}/Core/Src/dma2d.c
+# ${CMAKE_CURRENT_LIST_DIR}/Core/Src/fmc.c
+# ${CMAKE_CURRENT_LIST_DIR}/Core/Src/files.c
+# ${CMAKE_CURRENT_LIST_DIR}/Core/Src/gpio.c
+# ${CMAKE_CURRENT_LIST_DIR}/Core/Src/i2c.c
+# ${CMAKE_CURRENT_LIST_DIR}/Core/Src/ltdc.c
+# ${CMAKE_CURRENT_LIST_DIR}/Core/Src/quadspi.c
+# ${CMAKE_CURRENT_LIST_DIR}/Core/Src/sai.c
+# ${CMAKE_CURRENT_LIST_DIR}/Core/Src/spi.c
+# ${CMAKE_CURRENT_LIST_DIR}/Core/Src/sdmmc.c
+# ${CMAKE_CURRENT_LIST_DIR}/Core/Src/stm32h7xx_hal_msp.c
+# ${CMAKE_CURRENT_LIST_DIR}/Core/Src/stm32h7xx_hal_timebase_tim.c
+# ${CMAKE_CURRENT_LIST_DIR}/Core/Src/stm32h7xx_it.c
+# ${CMAKE_CURRENT_LIST_DIR}/Core/Src/system_stm32h7xx.c
+# ${CMAKE_CURRENT_LIST_DIR}/Core/Src/usart.c
+# ${CMAKE_CURRENT_LIST_DIR}/Core/Src/tim.c
+# )
 
 # Include directories for all compilers
 set(include_DIRS
@@ -67,7 +70,9 @@ set(include_cxx_DIRS)
 set(include_asm_DIRS)
 
 # Symbols definition for all compilers
-set(symbols_SYMB)
+set(symbols_SYMB
+USE_USB_FS
+)
 
 # Symbols definition for each compiler
 set(symbols_c_SYMB)
@@ -83,6 +88,7 @@ pcm5122
 audio
 FatFs
 FatFs_App
+USB_host
 )
 
 
@@ -100,6 +106,7 @@ add_subdirectory(Drivers/STM32H7xx_HAL_Driver)
 add_subdirectory(Drivers/audio)
 add_subdirectory(Drivers/pcm5122)
 add_subdirectory(Middlewares/Third_Party/FatFs)
+add_subdirectory(Middlewares/STM32_USB_Host_Library)
 add_subdirectory(FATFS)
 
 # Now call generated cmake
@@ -115,7 +122,7 @@ link_directories(${CMAKE_PROJECT_NAME} ${link_DIRS})
 add_executable(${CMAKE_PROJECT_NAME})
 
 # Add sources to executable
-target_sources(${CMAKE_PROJECT_NAME} PUBLIC ${sources_SRCS} ${graphics_core_generated_SRCS})
+target_sources(${CMAKE_PROJECT_NAME} PUBLIC ${sources_SRCS})
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE

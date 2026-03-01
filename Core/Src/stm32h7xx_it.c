@@ -33,7 +33,7 @@ extern TIM_HandleTypeDef htim7;
 extern DMA_HandleTypeDef hdma_sai2_b;
 extern SAI_HandleTypeDef hsai_BlockB2;
 extern SD_HandleTypeDef hsd2;
-
+extern HCD_HandleTypeDef hhcd;
 
 /* USER CODE BEGIN EV */
 
@@ -248,7 +248,11 @@ void SAI2_IRQHandler(void)
 
   /* USER CODE END SAI2_IRQn 1 */
 }
-
-/* USER CODE BEGIN 1 */
-
-/* USER CODE END 1 */
+#ifdef USE_USB_FS
+void OTG_FS_IRQHandler(void)
+#else
+void OTG_HS_IRQHandler(void)
+#endif
+{
+  HAL_HCD_IRQHandler(&hhcd);
+}
