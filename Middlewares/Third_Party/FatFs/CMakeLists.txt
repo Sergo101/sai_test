@@ -4,7 +4,9 @@ set(LIB_NAME FatFs)
 
 file(GLOB sources
   ${CMAKE_CURRENT_LIST_DIR}/src/option/syscall.c
-  ${CMAKE_CURRENT_LIST_DIR}/src/*.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/ff.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/ffsystem.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/ffunicode.c
 )
 
 file(GLOB headers

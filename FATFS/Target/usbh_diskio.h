@@ -21,12 +21,17 @@
 #define __USBH_DISKIO_H
 
 /* Includes ------------------------------------------------------------------*/
+
+#include "ff.h"
+#include "diskio.h"
 #include "usbh_core.h"
 #include "usbh_msc.h"
-/* Exported types ------------------------------------------------------------*/
-/* Exported constants --------------------------------------------------------*/
-/* Exported functions ------------------------------------------------------- */
-extern const Diskio_drvTypeDef  USBH_Driver;
+
+DSTATUS USBH_initialize (BYTE);
+DSTATUS USBH_status (BYTE);
+DRESULT USBH_read (BYTE, BYTE*, DWORD, UINT);
+DRESULT USBH_write (BYTE, const BYTE*, DWORD, UINT);
+DRESULT USBH_ioctl (BYTE, BYTE, void*);
 
 #endif /* __USBH_DISKIO_H */
 

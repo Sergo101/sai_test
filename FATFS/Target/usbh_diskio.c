@@ -17,45 +17,18 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "ff_gen_drv.h"
-#include "usbh_diskio.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 
+#include "usbh_diskio.h"
+
 #define USB_DEFAULT_BLOCK_SIZE 512
 
 /* Private variables ---------------------------------------------------------*/
-static DWORD scratch[_MAX_SS / 4];
+static DWORD scratch[FF_MAX_SS / 4];
 extern USBH_HandleTypeDef  hUSB_Host;
 
-/* Private function prototypes -----------------------------------------------*/
-DSTATUS USBH_initialize (BYTE);
-DSTATUS USBH_status (BYTE);
-DRESULT USBH_read (BYTE, BYTE*, DWORD, UINT);
-
-#if _USE_WRITE == 1
-  DRESULT USBH_write (BYTE, const BYTE*, DWORD, UINT);
-#endif /* _USE_WRITE == 1 */
-
-#if _USE_IOCTL == 1
-  DRESULT USBH_ioctl (BYTE, BYTE, void*);
-#endif /* _USE_IOCTL == 1 */
-
-const Diskio_drvTypeDef  USBH_Driver =
-{
-  USBH_initialize,
-  USBH_status,
-  USBH_read,
-#if  _USE_WRITE == 1
-  USBH_write,
-#endif /* _USE_WRITE == 1 */
-#if  _USE_IOCTL == 1
-  USBH_ioctl,
-#endif /* _USE_IOCTL == 1 */
-};
-
-/* Private functions ---------------------------------------------------------*/
 
 /**
   * @brief  Initializes a Drive
@@ -111,7 +84,7 @@ DRESULT USBH_read(BYTE lun, BYTE *buff, DWORD sector, UINT count)
 
       if(status == USBH_OK)
       {
-        memcpy (&buff[count * _MAX_SS] ,scratch, _MAX_SS);
+        memcpy (&buff[count * FF_MAX_SS] ,scratch, FF_MAX_SS);
       }
       else
       {
@@ -158,7 +131,6 @@ DRESULT USBH_read(BYTE lun, BYTE *buff, DWORD sector, UINT count)
   * @param  count: Number of sectors to write (1..128)
   * @retval DRESULT: Operation result
   */
-#if _USE_WRITE == 1
 DRESULT USBH_write(BYTE lun, const BYTE *buff, DWORD sector, UINT count)
 {
   DRESULT res = RES_ERROR;
@@ -170,7 +142,7 @@ DRESULT USBH_write(BYTE lun, const BYTE *buff, DWORD sector, UINT count)
 
     while (count--)
     {
-      memcpy (scratch, &buff[count * _MAX_SS], _MAX_SS);
+      memcpy (scratch, &buff[count * FF_MAX_SS], FF_MAX_SS);
 
       status = USBH_MSC_Write(&hUSB_Host, lun, sector + count, (BYTE *)scratch, 1) ;
       if(status == USBH_FAIL)
@@ -214,7 +186,6 @@ DRESULT USBH_write(BYTE lun, const BYTE *buff, DWORD sector, UINT count)
 
   return res;
 }
-#endif /* _USE_WRITE == 1 */
 
 /**
   * @brief  I/O control operation
@@ -223,7 +194,6 @@ DRESULT USBH_write(BYTE lun, const BYTE *buff, DWORD sector, UINT count)
   * @param  *buff: Buffer to send/receive control data
   * @retval DRESULT: Operation result
   */
-#if _USE_IOCTL == 1
 DRESULT USBH_ioctl(BYTE lun, BYTE cmd, void *buff)
 {
   DRESULT res = RES_ERROR;
@@ -282,6 +252,3 @@ DRESULT USBH_ioctl(BYTE lun, BYTE cmd, void *buff)
 
   return res;
 }
-#endif /* _USE_IOCTL == 1 */
-
-

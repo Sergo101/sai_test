@@ -98,6 +98,7 @@ uint32_t res = 0;
 
 uint8_t usb_mount = 0;
 
+uint8_t tmp[4096];
 /**
 * @brief  User Process
 * @param  phost: Host Handle
@@ -117,21 +118,16 @@ static void USBH_UserProcess(USBH_HandleTypeDef * phost, uint8_t id)
     {
       // LCD_DbgTrace("ERROR : Cannot DeInitialize FatFs! \n");
     }
-    if (FATFS_UnLinkDriver(USBDISKPath) != 0)
-    {
-      // LCD_DbgTrace("ERROR : Cannot UnLink FatFS Driver! \n");
-    }
     usb_mount = 0;
     break;
 
   case HOST_USER_CLASS_ACTIVE:
-    if (FATFS_LinkDriver(&USBH_Driver, USBDISKPath) == 0)
+    res = f_mount(&USBH_fatfs, "1:/", 1);
+    if (res == FR_NO_FILESYSTEM)
     {
-      if (f_mount(&USBH_fatfs, USBDISKPath, 0) != FR_OK)
-      {
-        __NOP();
-        // LCD_DbgTrace("ERROR : Cannot Initialize FatFs! \n");
-      }
+      res = f_mkfs("1:/",0,tmp,4096);			
+      __NOP();
+      // LCD_DbgTrace("ERROR : Cannot Initialize FatFs! \n");
     }
     usb_mount = 1;
     break;
@@ -204,11 +200,12 @@ int main(void)
 
   /* Start Host Process */
   ret = USBH_Start(&hUSB_Host);
+  #else
+  MX_FATFS_Init();
+  
+  res = sd_card_mount();
   #endif
 
-  // MX_FATFS_Init();
-  
-  // res = sd_card_mount();
   PCM5122_Reset ();
   PCM5122_Init();
 

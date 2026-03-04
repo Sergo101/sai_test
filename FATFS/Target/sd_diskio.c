@@ -25,9 +25,8 @@
 /* USER CODE END firstSection*/
 
 /* Includes ------------------------------------------------------------------*/
-#include "ff_gen_drv.h"
-#include "sd_diskio.h"
 
+#include "sd_diskio.h"
 #include "stm32h7xx_hal.h"
 
 #include <string.h>
@@ -87,29 +86,7 @@ static volatile DSTATUS Stat = STA_NOINIT;
 static volatile  UINT  WriteStatus = 0, ReadStatus = 0;
 /* Private function prototypes -----------------------------------------------*/
 static DSTATUS SD_CheckStatus(BYTE lun);
-DSTATUS SD_initialize (BYTE);
-DSTATUS SD_status (BYTE);
-DRESULT SD_read (BYTE, BYTE*, DWORD, UINT);
-#if _USE_WRITE == 1
-DRESULT SD_write (BYTE, const BYTE*, DWORD, UINT);
-#endif /* _USE_WRITE == 1 */
-#if _USE_IOCTL == 1
-DRESULT SD_ioctl (BYTE, BYTE, void*);
-#endif  /* _USE_IOCTL == 1 */
 
-const Diskio_drvTypeDef  SD_Driver =
-{
-  SD_initialize,
-  SD_status,
-  SD_read,
-#if  _USE_WRITE == 1
-  SD_write,
-#endif /* _USE_WRITE == 1 */
-
-#if  _USE_IOCTL == 1
-  SD_ioctl,
-#endif /* _USE_IOCTL == 1 */
-};
 
 /* USER CODE BEGIN beforeFunctionSection */
 /* can be used to modify / undefine following code or add new code */
@@ -309,8 +286,6 @@ timeout = HAL_GetTick();
   * @param  count: Number of sectors to write (1..128)
   * @retval DRESULT: Operation result
   */
-#if _USE_WRITE == 1
-
 DRESULT SD_write(BYTE lun, const BYTE *buff, DWORD sector, UINT count)
 {
   DRESULT res = RES_ERROR;
@@ -417,7 +392,6 @@ DRESULT SD_write(BYTE lun, const BYTE *buff, DWORD sector, UINT count)
 #endif
   return res;
 }
-#endif /* _USE_WRITE == 1 */
 
 /* USER CODE BEGIN beforeIoctlSection */
 /* can be used to modify previous code / undefine following code / add new code */
@@ -429,7 +403,6 @@ DRESULT SD_write(BYTE lun, const BYTE *buff, DWORD sector, UINT count)
   * @param  *buff: Buffer to send/receive control data
   * @retval DRESULT: Operation result
   */
-#if _USE_IOCTL == 1
 DRESULT SD_ioctl(BYTE lun, BYTE cmd, void *buff)
 {
   DRESULT res = RES_ERROR;
@@ -471,7 +444,6 @@ DRESULT SD_ioctl(BYTE lun, BYTE cmd, void *buff)
 
   return res;
 }
-#endif /* _USE_IOCTL == 1 */
 
 /* USER CODE BEGIN afterIoctlSection */
 /* can be used to modify previous code / undefine following code / add new code */

@@ -29,13 +29,14 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "bsp_driver_sd.h"
-/* Exported types ------------------------------------------------------------*/
-/* Exported constants --------------------------------------------------------*/
-/* Exported functions ------------------------------------------------------- */
-extern const Diskio_drvTypeDef  SD_Driver;
 
-/* USER CODE BEGIN lastSection */
-/* can be used to modify / undefine previous code or add new definitions */
-/* USER CODE END lastSection */
+#include "ff.h"
+#include "diskio.h"
+
+DSTATUS SD_initialize (BYTE);
+DSTATUS SD_status (BYTE);
+DRESULT SD_read (BYTE, BYTE*, DWORD, UINT);
+DRESULT SD_write (BYTE, const BYTE*, DWORD, UINT);
+DRESULT SD_ioctl (BYTE, BYTE, void*);
 
 #endif /* __SD_DISKIO_H */

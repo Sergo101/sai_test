@@ -19,7 +19,7 @@
 #include "fatfs.h"
 
 uint8_t retSD;    /* Return value for SD */
-char SDPath[4];   /* SD logical drive path */
+char SDPath[4] = "0:/";   /* SD logical drive path */
 FATFS SDFatFS;    /* File system object for SD logical drive */
 FIL SDFile;       /* File object for SD */
 
@@ -43,7 +43,6 @@ void printf_fatfs_error(FRESULT fresult);
 void MX_FATFS_Init(void)
 {
   /*## FatFS: Link the SD driver ###########################*/
-  retSD = FATFS_LinkDriver(&SD_Driver, SDPath);
 
   /* USER CODE BEGIN Init */
   /* additional user code for init */
@@ -52,7 +51,6 @@ void MX_FATFS_Init(void)
 
 void MX_FATFS_ReInit(void)
 {
-  FATFS_UnLinkDriver(SDPath);
   // memset(SDPath, 0x00, sizeof(SDPath));
 }
 
@@ -145,7 +143,7 @@ uint8_t sd_card_mount()
 
     if(f_res == FR_NO_FILESYSTEM)
     {
-      f_res=f_mkfs((TCHAR const*)SDPath,0,0,0,0);							
+      f_res=f_mkfs((TCHAR const*)SDPath,0,0,0);							
       
       if(f_res == FR_OK)
       {

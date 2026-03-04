@@ -286,7 +286,7 @@ void PlayCycleAudio (void)
 {
   if(is_cycle_play == 0)
   {
-    FindWavFiles("0:/", &files);
+    FindWavFiles("1:/", &files);
   
     sai_dma_state = 0;
     set_cycleplay(1);
