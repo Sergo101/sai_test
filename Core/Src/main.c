@@ -97,8 +97,9 @@ uint8_t next_track = 0;
 uint32_t res = 0;
 
 uint8_t usb_mount = 0;
-
+    FIL textFile;
 uint8_t tmp[4096];
+char textstr[] = "Listen here you, little shit!\r\n";
 /**
 * @brief  User Process
 * @param  phost: Host Handle
@@ -123,12 +124,18 @@ static void USBH_UserProcess(USBH_HandleTypeDef * phost, uint8_t id)
 
   case HOST_USER_CLASS_ACTIVE:
     res = f_mount(&USBH_fatfs, "1:/", 1);
+    __NOP();
+
     if (res == FR_NO_FILESYSTEM)
     {
-      res = f_mkfs("1:/",0,tmp,4096);			
+      MKFS_PARM param = {FM_FAT32, 0, 0, 0, 0};
+      // res = f_mkfs("1:/",&param,0,0);
       __NOP();
       // LCD_DbgTrace("ERROR : Cannot Initialize FatFs! \n");
     }
+    f_open(&textFile, "1:/test.txt", FA_CREATE_ALWAYS);
+    f_write(&textFile, textstr, sizeof(textstr), NULL);
+    f_close(&textFile);
     usb_mount = 1;
     break;
 
@@ -166,15 +173,15 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USART1_UART_Init();
+  // MX_USART1_UART_Init();
   HAL_GPIO_WritePin(AUDIO_OUTSEL_Port, AUDIO_OUTSEL_Pin, GPIO_PIN_RESET);
   
   
-  MX_FMC_Init();
-	SDRAM_InitSequence();
+  // MX_FMC_Init();
+	// SDRAM_InitSequence();
 
-  MX_CRC_Init();
-  MX_I2C4_Init();
+  // MX_CRC_Init();
+  // MX_I2C4_Init();
   MX_DMA_Init();
 	MX_SPI1_Init();
 	

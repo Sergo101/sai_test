@@ -74,30 +74,8 @@ DRESULT USBH_read(BYTE lun, BYTE *buff, DWORD sector, UINT count)
 {
   DRESULT res = RES_ERROR;
   MSC_LUNTypeDef info;
-  USBH_StatusTypeDef  status = USBH_OK;
 
-  if (((DWORD)buff & 3) || (((HCD_HandleTypeDef *)hUSB_Host.pData)->Init.dma_enable))
-  {
-    while ((count--)&&(status == USBH_OK))
-    {
-      status = USBH_MSC_Read(&hUSB_Host, lun, sector + count, (uint8_t *)scratch, 1);
-
-      if(status == USBH_OK)
-      {
-        memcpy (&buff[count * FF_MAX_SS] ,scratch, FF_MAX_SS);
-      }
-      else
-      {
-        break;
-      }
-    }
-  }
-  else
-  {
-    status = USBH_MSC_Read(&hUSB_Host, lun, sector, buff, count);
-  }
-
-  if(status == USBH_OK)
+  if(USBH_MSC_Read(&hUSB_Host, lun, sector, buff, count) == USBH_OK)
   {
     res = RES_OK;
   }
